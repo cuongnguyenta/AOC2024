@@ -10,7 +10,8 @@ struct Day02: AdventDay {
     }
     
     func part2() -> Any {
-        return "Not implemented"
+        let nums = multiEnabledPairs(data)
+        return nums.reduce(0, +)
     }
 }
 
@@ -36,5 +37,29 @@ private extension Day02 {
             }
         }
         return result
+    }
+    
+    func multiEnabledPairs(_ input: String) -> [Int] {
+        let pattern = #"(\w*do\(\)|\w*don't\(\)|mul\((\d+),(\d+)\))"#
+        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+        let matches = regex.matches(in: input, options: [], range: NSRange(input.startIndex..., in: input))
+
+        var isEnabled = true
+        var results: [Int] = []
+
+        for match in matches {
+            let matchedString = String(input[Range(match.range, in: input)!])
+            
+            if matchedString.hasSuffix("do()") {
+                isEnabled = true
+            } else if matchedString.hasSuffix("don't()") {
+                isEnabled = false
+            } else if matchedString.starts(with: "mul(") && isEnabled {
+                let x = Int(input[Range(match.range(at: 2), in: input)!])!
+                let y = Int(input[Range(match.range(at: 3), in: input)!])!
+                results.append(x * y)
+            }
+        }
+        return results
     }
 }
