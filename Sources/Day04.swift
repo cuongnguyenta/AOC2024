@@ -26,7 +26,7 @@ struct Day04: AdventDay {
         }
     }
     
-    private func updateOk(_ update: [Int]) -> Bool {
+    private func satisfyToUpdate(_ update: [Int]) -> Bool {
         update
             .combinations(ofCount: 2)
             .map { Rule(page1: $0[0], page2: $0[1]) }
@@ -34,7 +34,19 @@ struct Day04: AdventDay {
     }
     func part1() -> Int {
         updates
-            .filter { updateOk($0) }
+            .filter { satisfyToUpdate($0) }
+            .map { $0.median() }
+            .reduce(0, +)
+    }
+    
+    func part2() -> Int {
+        updates
+            .filter { !satisfyToUpdate($0) }
+            .map {
+                $0.sorted { p1, p2 in
+                    rules.contains(Rule(page1: p1, page2: p2))
+                }
+            }
             .map { $0.median() }
             .reduce(0, +)
     }
