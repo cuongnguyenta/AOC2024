@@ -2,18 +2,24 @@ import Testing
 
 @testable import AdventOfCode
 
-struct Day02Tests {
-    // Smoke test data provided in the challenge question
-    let testData = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"
-    let testData2 = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
-    
-    @Test func testPart1() async throws {
-        let challenge = Day02(data: testData)
-        #expect(String(describing: challenge.part1()) == "161")
-    }
-    
-    @Test func testPart2() async throws {
-        let challenge = Day02(data: testData2)
-        #expect(String(describing: challenge.part2()) == "48")
-    }
+struct Day01Tests {
+  // Smoke test data provided in the challenge question
+  let testData = """
+    7 6 4 2 1
+    1 2 7 8 9
+    9 7 6 2 1
+    1 3 2 4 5
+    8 6 4 4 1
+    1 3 6 7 9
+    """
+
+  @Test func testPart1() async throws {
+    let challenge = Day02(data: testData)
+    #expect(String(describing: challenge.part1()) == "2")
+  }
+
+  @Test func testPart2() async throws {
+    let challenge = Day02(data: testData)
+    #expect(String(describing: challenge.part2()) == "4")
+  }
 }

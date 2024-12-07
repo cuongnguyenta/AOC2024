@@ -1,101 +1,65 @@
+import Algorithms
 import Foundation
 
 struct Day03: AdventDay {
     var data: String
     
-    var grid: [String] {
-        data.components(separatedBy: .newlines).filter { !$0.isEmpty }
-    }
-    
     func part1() -> Any {
-        return findOccurrences(grid: grid, word: "XMAS")
+        let nums = multiplicationPattern(data)
+        return nums.reduce(0, +)
     }
     
     func part2() -> Any {
-        return findXMASPatterns(grid: grid)
+        let nums = multiEnabledPairs(data)
+        return nums.reduce(0, +)
     }
-    
 }
 
 private extension Day03 {
-    func findOccurrences(grid: [String], word: String) -> Int {
-        let numRows = grid.count
-        let numCols = grid[0].count
-        let wordLength = word.count
-        var count = 0
+    func multiplicationPattern(_ data: String) -> [Int] {
+        // Define the regex pattern
+        let pattern = "mul\\((\\d+),(\\d+)\\)"
+        var result: [Int] = []
+        // Create a regular expression object
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            // Find all matches in the string
+            let matches = regex.matches(in: data, options: [], range: NSRange(data.startIndex..., in: data))
 
-        let directions = [
-            (0, 1),    // Horizontal right
-            (1, 0),    // Vertical down
-            (1, 1),    // Diagonal down-right
-            (-1, 1),   // Diagonal up-right
-            (0, -1),   // Horizontal left
-            (-1, 0),   // Vertical up
-            (-1, -1),  // Diagonal up-left
-            (1, -1)    // Diagonal down-left
-        ]
-
-        func wordExists(row: Int, col: Int, dRow: Int, dCol: Int) -> Bool {
-            for i in 0..<wordLength {
-                let newRow = row + i * dRow
-                let newCol = col + i * dCol
-                if !(0..<numRows ~= newRow && 0..<numCols ~= newCol) {
-                    return false
+            // Extract number pairs and perform multiplication
+            result = matches.compactMap { match -> Int? in
+                guard let range1 = Range(match.range(at: 1), in: data),
+                      let range2 = Range(match.range(at: 2), in: data),
+                      let num1 = Int(data[range1]),
+                      let num2 = Int(data[range2]) else {
+                    return nil
                 }
-                if grid[newRow][String.Index(utf16Offset: newCol, in: grid[newRow])] != word[String.Index(utf16Offset: i, in: word)] {
-                    return false
-                }
-            }
-            return true
-        }
-
-        for row in 0..<numRows {
-            for col in 0..<numCols {
-                for (dRow, dCol) in directions {
-                    if wordExists(row: row, col: col, dRow: dRow, dCol: dCol) {
-                        count += 1
-                    }
-                }
+                return num1 * num2
             }
         }
-
-        return count
+        return result
     }
     
-    func findXMASPatterns(grid: [String]) -> Int {
-        let rows = grid.count
-        let cols = grid[0].count
-        var count = 0
-        
-        func charAt(_ row: Int, _ col: Int) -> Character? {
-            guard row >= 0 && row < rows && col >= 0 && col < cols else { return nil }
-            let index = grid[row].index(grid[row].startIndex, offsetBy: col)
-            return grid[row][index]
-        }
-        
-        func checkMASPattern(_ row: Int, _ col: Int, _ dRow: Int, _ dCol: Int) -> Bool {
-            guard let first = charAt(row, col),
-                  let second = charAt(row + dRow, col + dCol),
-                  let third = charAt(row + 2 * dRow, col + 2 * dCol) else {
-                return false
-            }
+    func multiEnabledPairs(_ input: String) -> [Int] {
+        let pattern = #"(\w*do\(\)|\w*don't\(\)|mul\((\d+),(\d+)\))"#
+        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+        let matches = regex.matches(in: input, options: [], range: NSRange(input.startIndex..., in: input))
+
+        var isEnabled = true
+        var results: [Int] = []
+
+        for match in matches {
+            let matchedString = String(input[Range(match.range, in: input)!])
             
-            // Check for MAS or SAM pattern
-            return (first == "M" && second == "A" && third == "S") ||
-                   (first == "S" && second == "A" && third == "M")
-        }
-        
-        // Check each position in the grid
-        for row in 0..<rows {
-            for col in 0..<cols {
-                // Check each possible X pattern
-                if checkMASPattern(row, col, 1, 1) && checkMASPattern(row, col + 2, 1, -1) ||
-                   checkMASPattern(row + 2, col, -1, 1) && checkMASPattern(row + 2, col + 2, -1, -1) {
-                    count += 1
-                }
+            if matchedString.hasSuffix("do()") {
+                isEnabled = true
+            } else if matchedString.hasSuffix("don't()") {
+                isEnabled = false
+            } else if matchedString.starts(with: "mul(") && isEnabled {
+                let x = Int(input[Range(match.range(at: 2), in: input)!])!
+                let y = Int(input[Range(match.range(at: 3), in: input)!])!
+                results.append(x * y)
             }
         }
-        
-        return count
+        return results
     }
 }
