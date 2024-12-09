@@ -36,5 +36,4 @@ struct Day01: AdventDay {
         }
         return res
     }
-    
 }
